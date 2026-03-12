@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LP Space">
+<meta name="theme-color" content="#080808">
+<title>LINKIN PARK × 我的空间</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;600;700&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #cc0000;
+  --red-bright: #ff2222;
+  --red-glow: rgba(204,0,0,0.4);
+  --dark: #080808;
+  --dark2: #111;
+  --dark3: #1a1a1a;
+  --metal: #2a2a2a;
+  --text: #e8e8e8;
+  --dim: #888;
+  --sat: env(safe-area-inset-top, 44px);
+  --sab: env(safe-area-inset-bottom, 34px);
+  --nav-h: calc(52px + env(safe-area-inset-top, 44px));
+  --tab-h: calc(60px + env(safe-area-inset-bottom, 34px));
+  --mini-h: 58px;
+}
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+html, body {
+  height: 100%; overflow: hidden;
+  background: var(--dark); color: var(--text);
+  font-family: 'Rajdhani', 'Noto Sans SC', -apple-system, sans-serif;
+  position: fixed; width: 100%;
+  overscroll-behavior: none;
+}
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9000;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity: 0.55;
+}
+
+/* ===== TOP BAR ===== */
+.top-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+  height: var(--nav-h);
+  padding-top: env(safe-area-inset-top, 44px);
+  display: flex; align-items: center; justify-content: space-between;
+  padding-left: 20px; padding-right: 20px;
+  background: rgba(8,8,8,0.88);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid rgba(204,0,0,0.2);
+}
+.top-logo {
+  font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+  letter-spacing: 5px; color: var(--red-bright);
+  text-shadow: 0 0 16px var(--red-glow);
+  animation: logoGlitch 6s infinite;
+}
+@keyframes logoGlitch {
+  0%,88%,100% { text-shadow: 0 0 16px var(--red-glow); }
+  89% { text-shadow: -2px 0 #ff2200, 2px 0 #0044ff, 0 0 16px var(--red-glow); }
+  91% { text-shadow: 2px 0 #ff2200, -2px 0 #0044ff, 0 0 16px var(--red-glow); }
+  93% { text-shadow: 0 0 16px var(--red-glow); }
+}
+.top-right { font-size: 12px; color: var(--dim); letter-spacing: 2px; display: flex; align-items: center; gap: 6px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red-bright); box-shadow: 0 0 6px var(--red-glow); animation: dp 2s ease infinite; display: inline-block; }
+@keyframes dp { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.3;transform:scale(0.6)} }
+
+/* ===== PAGE SYSTEM ===== */
+.pages {
+  position: fixed;
+  top: var(--nav-h); left: 0; right: 0;
+  bottom: var(--tab-h);
+  overflow: hidden;
+}
+.page {
+  position: absolute; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  opacity: 0; transform: translateX(20px) translateZ(0);
+  transition: opacity .28s cubic-bezier(.25,.46,.45,.94), transform .28s cubic-bezier(.25,.46,.45,.94);
+  pointer-events: none; will-change: transform,opacity;
+}
+.page.active { opacity: 1; transform: translateX(0) translateZ(0); pointer-events: all; }
+
+/* ===== MINI PLAYER ===== */
+.mini {
+  position: fixed; left: 0; right: 0;
+  bottom: var(--tab-h); height: var(--mini-h);
+  background: rgba(14,4,4,0.96);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-top: 0.5px solid rgba(204,0,0,0.3);
+  display: flex; align-items: center; gap: 12px; padding: 0 16px;
+  z-index: 490;
+  transform: translateY(var(--mini-h)) translateZ(0);
+  transition: transform .38s cubic-bezier(.25,.46,.45,.94);
+  will-change: transform; cursor: pointer;
+}
+.mini.on { transform: translateY(0) translateZ(0); }
+.mini-disc {
+  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  background: radial-gradient(circle, #cc0000 0%, #660000 55%, #111 100%);
+  animation: spin 3s linear infinite; animation-play-state: paused;
+  will-change: transform;
+}
+.mini-disc.pl { animation-play-state: running; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.mini-info { flex: 1; min-width: 0; }
+.mini-name { font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:2px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mini-sub2 { font-size:12px; color:var(--dim); letter-spacing:1px; }
+.mini-btns { display:flex; align-items:center; gap:4px; }
+.mini-btn {
+  width:42px; height:42px; border:none; background:none; color:var(--text);
+  display:flex; align-items:center; justify-content:center;
+  border-radius:50%; cursor:pointer; transition:transform .15s;
+}
+.mini-btn:active { transform:scale(0.82); }
+.mini-btn svg { width:22px; height:22px; fill:currentColor; }
+.mini-play {
+  width:44px; height:44px;
+  border:1.5px solid var(--red) !important; color:var(--red-bright);
+  background:rgba(204,0,0,0.08) !important;
+}
+.mini-prog { position:absolute; bottom:0; left:0; right:0; height:2px; background:rgba(204,0,0,0.12); }
+.mini-prog-fill { height:100%; background:var(--red); transition:width .4s linear; width:0%; }
+
+/* ===== TAB BAR ===== */
+.tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
+  height: var(--tab-h);
+  padding-bottom: env(safe-area-inset-bottom, 34px);
+  display: flex; align-items: flex-start; padding-top: 8px;
+  background: rgba(8,8,8,0.94);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: 0.5px solid rgba(255,255,255,0.07);
+}
+.tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; padding: 5px 0;
+  transition: transform .15s; -webkit-tap-highlight-color: transparent;
+}
+.tab:active { transform: scale(0.86); }
+.tab-ic { font-size: 22px; filter: grayscale(1) brightness(0.45); transition: filter .2s; }
+.tab-lb { font-size: 11px; color: var(--dim); letter-spacing: 0.5px; font-weight: 700; transition: color .2s; }
+.tab.active .tab-ic { filter: none; filter: drop-shadow(0 0 5px var(--red)); }
+.tab.active .tab-lb { color: var(--red-bright); }
+
+/* ===== PLAYER PAGE ===== */
+#pg-player { padding: 18px 18px 30px; }
+.swipe-hint { text-align:center; font-size:11px; color:rgba(255,255,255,0.13); letter-spacing:2px; margin-bottom:14px; }
+
+.vinyl-stage { display:flex; justify-content:center; margin-bottom:24px; }
+.vinyl-wrap { position:relative; width:min(270px,70vw); height:min(270px,70vw); }
+.vinyl {
+  width:100%; height:100%; border-radius:50%; will-change:transform;
+  background:
+    radial-gradient(circle at 50% 50%, #242424 0%, #121212 15%,
+    #1c1c1c 18%, #111 32%, #1c1c1c 35%,
+    #111 50%, #1c1c1c 53%, #111 67%,
+    #1c1c1c 70%, #080808 86%, #050505 100%);
+  box-shadow: 0 8px 40px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.04);
+  animation: spin 4s linear infinite; animation-play-state:paused;
+}
+.vinyl.pl { animation-play-state:running; }
+.vinyl::before {
+  content:''; position:absolute; inset:0; border-radius:50%;
+  background: repeating-radial-gradient(circle at 50% 50%,
+    rgba(255,255,255,.007) 0px, rgba(255,255,255,.007) 1px,
+    transparent 1px, transparent 4px);
+}
+.vinyl-lbl {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:72px; height:72px; border-radius:50%; z-index:2;
+  background:radial-gradient(circle,#dd0000,#880000 60%,#550000);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:2px;
+  color:rgba(255,255,255,.85); box-shadow:0 2px 10px rgba(0,0,0,.5);
+}
+.vinyl-lbl::before { content:''; position:absolute; width:10px; height:10px; border-radius:50%; background:#060606; }
+.tonearm {
+  position:absolute; top:-4px; right:-18px; width:66px; height:106px;
+  transform-origin: 56px 12px;
+  transform:rotate(-20deg) translateZ(0);
+  transition:transform .8s cubic-bezier(.25,.46,.45,.94);
+  z-index:3; will-change:transform;
+}
+.tonearm.pl { transform:rotate(-3deg) translateZ(0); }
+
+.track-info { text-align:center; margin-bottom:20px; }
+.track-name { font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:4px; color:#fff; line-height:1; margin-bottom:6px; }
+.track-meta { font-size:15px; color:var(--red); letter-spacing:2px; font-weight:700; }
+.track-album { font-size:13px; color:var(--dim); letter-spacing:1px; margin-top:4px; }
+
+.eq-row { display:flex; align-items:flex-end; justify-content:center; gap:5px; height:26px; margin-bottom:18px; }
+.eq-bar { width:4px; background:var(--red); border-radius:2px 2px 0 0; animation:eqA .45s ease-in-out infinite alternate; animation-play-state:paused; will-change:height; }
+.eq-active .eq-bar { animation-play-state:running; }
+.eq-bar:nth-child(1){animation-duration:.38s}
+.eq-bar:nth-child(2){animation-duration:.55s;animation-delay:.1s}
+.eq-bar:nth-child(3){animation-duration:.32s;animation-delay:.2s}
+.eq-bar:nth-child(4){animation-duration:.48s;animation-delay:.08s}
+.eq-bar:nth-child(5){animation-duration:.42s;animation-delay:.15s}
+.eq-bar:nth-child(6){animation-duration:.35s;animation-delay:.22s}
+.eq-bar:nth-child(7){animation-duration:.50s;animation-delay:.05s}
+.eq-bar:nth-child(8){animation-duration:.40s;animation-delay:.18s}
+@keyframes eqA { from{height:3px} to{height:22px} }
+
+.prog-section { margin-bottom:22px; }
+.time-row { display:flex; justify-content:space-between; font-size:13px; color:var(--dim); letter-spacing:1px; margin-bottom:10px; }
+.prog-track { height:5px; background:rgba(255,255,255,.1); border-radius:3px; position:relative; touch-action:none; cursor:pointer; }
+.prog-fill { height:100%; background:linear-gradient(90deg,#880000,var(--red-bright)); border-radius:3px; width:0%; position:relative; transition:width .4s linear; will-change:width; }
+.prog-thumb { position:absolute; right:-9px; top:50%; transform:translateY(-50%) scale(0); width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 0 12px var(--red-glow); transition:transform .2s; }
+.prog-track:active .prog-thumb, .prog-track.drag .prog-thumb { transform:translateY(-50%) scale(1); }
+
+.controls { display:flex; align-items:center; justify-content:center; gap:22px; margin-bottom:20px; }
+.ctrl { width:54px; height:54px; background:none; border:none; color:var(--dim); display:flex; align-items:center; justify-content:center; border-radius:50%; cursor:pointer; transition:transform .15s,color .2s; }
+.ctrl:active { transform:scale(0.80); color:#fff; }
+.ctrl svg { width:28px; height:28px; fill:currentColor; }
+.play-ctrl { width:74px; height:74px; border:2px solid var(--red) !important; color:var(--red-bright); background:rgba(204,0,0,0.08) !important; box-shadow:0 0 22px rgba(204,0,0,.12), inset 0 0 18px rgba(204,0,0,.06); }
+.play-ctrl svg { width:32px; height:32px; }
+.play-ctrl:active { background:rgba(204,0,0,.25) !important; transform:scale(0.88) !important; }
+
+.vol-row { display:flex; align-items:center; gap:12px; }
+.vol-ic svg { width:18px; height:18px; fill:var(--dim); }
+.vol-slider { flex:1; -webkit-appearance:none; height:5px; background:rgba(255,255,255,.1); border-radius:3px; outline:none; }
+.vol-slider::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:#fff; cursor:pointer; box-shadow:0 1px 5px rgba(0,0,0,.5); }
+
+/* ===== LYRICS PAGE ===== */
+#pg-lyrics { padding: 0; }
+.lyr-now { padding:18px 20px 14px; border-bottom:.5px solid rgba(255,255,255,.06); background:rgba(12,4,4,.65); }
+.lyr-now-title { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:3px; color:var(--red); }
+.lyr-now-sub { font-size:13px; color:var(--dim); letter-spacing:1px; margin-top:3px; }
+.lyr-area { padding:20px 22px 80px; }
+.lyr-line { padding:13px 0; border-bottom:.5px solid rgba(255,255,255,.04); transition:all .38s cubic-bezier(.25,.46,.45,.94); }
+.lyr-en { font-size:16px; font-weight:600; color:rgba(255,255,255,.22); letter-spacing:.5px; line-height:1.5; transition:all .38s; }
+.lyr-cn { font-size:15px; color:rgba(255,255,255,.14); margin-top:5px; font-family:'Noto Sans SC',sans-serif; line-height:1.5; transition:all .38s; }
+.lyr-line.active { padding:17px 0; }
+.lyr-line.active .lyr-en { color:#fff; font-size:18px; text-shadow:0 0 20px rgba(204,0,0,.4); }
+.lyr-line.active .lyr-cn { color:var(--red); font-size:16px; }
+.lyr-line.prev .lyr-en { color:rgba(255,255,255,.4); }
+.lyr-line.prev .lyr-cn { color:rgba(255,255,255,.22); }
+
+/* ===== PLAYLIST PAGE ===== */
+#pg-playlist { padding:16px 0 20px; }
+.pl-hdr { font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:4px; color:var(--dim); padding:0 20px 12px; }
+.pl-item { display:flex; align-items:center; padding:13px 20px; gap:14px; cursor:pointer; transition:background .2s; position:relative; }
+.pl-item:active { background:rgba(204,0,0,.09); }
+.pl-item.active { background:rgba(204,0,0,.06); }
+.pl-item::after { content:''; position:absolute; bottom:0; left:20px; right:20px; height:.5px; background:rgba(255,255,255,.05); }
+.pl-art { width:52px; height:52px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:22px; position:relative; overflow:hidden; }
+.pl-art-ov { position:absolute; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .2s; }
+.pl-item.active .pl-art-ov { opacity:1; }
+.pl-bars { display:flex; align-items:flex-end; gap:3px; height:16px; }
+.pl-bar { width:3px; background:#fff; border-radius:1px; animation:plB .4s ease-in-out infinite alternate; animation-play-state:paused; }
+.pl-item.playing-on .pl-bar { animation-play-state:running; }
+.pl-bar:nth-child(1){animation-duration:.3s}
+.pl-bar:nth-child(2){animation-duration:.5s;animation-delay:.1s}
+.pl-bar:nth-child(3){animation-duration:.4s;animation-delay:.2s}
+@keyframes plB { from{height:3px} to{height:14px} }
+.pl-info { flex:1; min-width:0; }
+.pl-title { font-size:16px; font-weight:700; color:var(--text); letter-spacing:.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pl-item.active .pl-title { color:var(--red-bright); }
+.pl-sub { font-size:13px; color:var(--dim); margin-top:3px; letter-spacing:.5px; }
+.pl-dur { font-size:13px; color:var(--dim); letter-spacing:1px; flex-shrink:0; }
+
+/* ===== PHOTOS PAGE ===== */
+#pg-photos { padding:16px 12px 30px; }
+.ph-sub { font-size:13px; color:var(--dim); letter-spacing:2px; text-align:center; margin-bottom:18px; font-family:'Noto Sans SC',sans-serif; }
+.ph-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.polaroid { background:#f0ece0; padding:10px 10px 36px; position:relative; cursor:pointer; will-change:transform; box-shadow:0 6px 28px rgba(0,0,0,.75),0 1px 4px rgba(0,0,0,.5); transition:transform .3s cubic-bezier(.25,.46,.45,.94),box-shadow .3s; }
+.polaroid:nth-child(odd) { transform:rotate(-2.5deg); }
+.polaroid:nth-child(even) { transform:rotate(2deg); }
+.polaroid:nth-child(3) { transform:rotate(-1deg); }
+.polaroid:nth-child(5) { transform:rotate(3deg); }
+.polaroid:active { transform:rotate(0) scale(0.96) !important; box-shadow:0 2px 10px rgba(0,0,0,.5) !important; }
+.tape { position:absolute; top:-10px; left:50%; transform:translateX(-50%) rotate(-5deg); width:48px; height:20px; background:rgba(200,0,0,.5); }
+.polaroid:nth-child(even) .tape { transform:translateX(-50%) rotate(6deg); }
+.pol-art { width:100%; aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:44px; position:relative; overflow:hidden; }
+.pol-art::after { content:''; position:absolute; inset:0; background:repeating-linear-gradient(45deg,rgba(0,0,0,.04) 0px,rgba(0,0,0,.04) 1px,transparent 1px,transparent 6px); }
+.pol-cap { text-align:center; padding-top:8px; font-family:'Noto Sans SC',sans-serif; font-size:12px; color:#333; line-height:1.4; }
+.pol-date { font-size:10px; color:#888; display:block; margin-top:3px; }
+
+/* ===== ABOUT PAGE ===== */
+#pg-about { padding:20px 20px 50px; }
+.ab-head { display:flex; align-items:center; gap:18px; margin-bottom:24px; padding-bottom:22px; border-bottom:.5px solid rgba(255,255,255,.07); }
+.ab-avatar { width:78px; height:78px; border-radius:50%; border:2px solid var(--red); display:flex; align-items:center; justify-content:center; font-size:36px; flex-shrink:0; background:var(--dark2); box-shadow:0 0 20px rgba(204,0,0,.18); }
+.ab-name { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:4px; color:#fff; }
+.ab-role { font-size:13px; color:var(--red); letter-spacing:2px; margin-top:4px; }
+.ab-p { font-size:16px; color:var(--dim); line-height:1.95; margin-bottom:14px; font-family:'Noto Sans SC',sans-serif; }
+.ab-p strong { color:var(--text); font-weight:700; }
+.quote { margin:22px 0; padding:18px 18px 18px 22px; border-left:3px solid var(--red); background:rgba(204,0,0,.04); border-radius:0 8px 8px 0; }
+.quote-t { font-size:16px; color:var(--text); line-height:1.75; font-style:italic; letter-spacing:.5px; }
+.quote-c { display:block; margin-top:10px; font-size:12px; color:var(--red); letter-spacing:2px; font-style:normal; }
+.tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+.tag { border:1px solid rgba(204,0,0,.4); color:var(--red); padding:6px 14px; font-size:13px; letter-spacing:2px; border-radius:20px; font-weight:700; }
+
+::-webkit-scrollbar { width:0; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="top-logo">LINKIN PARK</div>
+  <div class="top-right"><span class="dot"></span>我的空间</div>
+</div>
+
+<!-- PAGES -->
+<div class="pages">
+
+  <!-- PLAYER -->
+  <div class="page active" id="pg-player">
+    <div class="swipe-hint">← 左右滑动切歌 →</div>
+    <div class="vinyl-stage">
+      <div class="vinyl-wrap">
+        <div class="vinyl" id="vDisc">
+          <div class="vinyl-lbl">LP</div>
+        </div>
+        <div class="tonearm" id="tArm">
+          <svg viewBox="0 0 66 106" fill="none">
+            <circle cx="56" cy="12" r="9" fill="#2a2a2a" stroke="#444" stroke-width="1.5"/>
+            <circle cx="56" cy="12" r="4.5" fill="#1a1a1a"/>
+            <line x1="56" y1="21" x2="12" y2="98" stroke="#555" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="12" y1="98" x2="3" y2="106" stroke="#777" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="3" cy="103" r="4" fill="#cc0000"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="track-info">
+      <div class="track-name" id="tName">IN THE END</div>
+      <div class="track-meta" id="tArtist">LINKIN PARK</div>
+      <div class="track-album" id="tAlbum">Hybrid Theory · 2000</div>
+    </div>
+    <div class="eq-row" id="eqRow">
+      <div class="eq-bar" style="height:5px"></div>
+      <div class="eq-bar" style="height:14px"></div>
+      <div class="eq-bar" style="height:8px"></div>
+      <div class="eq-bar" style="height:20px"></div>
+      <div class="eq-bar" style="height:11px"></div>
+      <div class="eq-bar" style="height:16px"></div>
+      <div class="eq-bar" style="height:6px"></div>
+      <div class="eq-bar" style="height:18px"></div>
+    </div>
+    <div class="prog-section">
+      <div class="time-row">
+        <span id="cTime">0:00</span>
+        <span id="tTime">3:36</span>
+      </div>
+      <div class="prog-track" id="progTrack">
+        <div class="prog-fill" id="progFill">
+          <div class="prog-thumb"></div>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="ctrl" onclick="prev()">
+        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6L20 18V6z"/></svg>
+      </button>
+      <button class="ctrl play-ctrl" id="playBtn" onclick="togglePlay()">
+        <svg id="playIco" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button class="ctrl" onclick="next()">
+        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2.5-6L17 6h2v12h-2z"/></svg>
+      </button>
+    </div>
+    <div class="vol-row">
+      <div class="vol-ic"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg></div>
+      <input type="range" class="vol-slider" min="0" max="100" value="75">
+      <div class="vol-ic"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg></div>
+    </div>
+  </div>
+
+  <!-- LYRICS -->
+  <div class="page" id="pg-lyrics">
+    <div class="lyr-now">
+      <div class="lyr-now-title" id="lyrTitle">IN THE END</div>
+      <div class="lyr-now-sub"><span class="dot"></span><span id="lyrSub">LINKIN PARK · Hybrid Theory</span></div>
+    </div>
+    <div class="lyr-area" id="lyrArea"></div>
+  </div>
+
+  <!-- PLAYLIST -->
+  <div class="page" id="pg-playlist">
+    <div class="pl-hdr">PLAYLIST · 5首</div>
+    <div id="plCont"></div>
+  </div>
+
+  <!-- PHOTOS -->
+  <div class="page" id="pg-photos">
+    <div class="ph-sub">我和林肯公园的记忆 · Memories</div>
+    <div class="ph-grid" id="phGrid"></div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="page" id="pg-about">
+    <div class="ab-head">
+      <div class="ab-avatar">🎸</div>
+      <div>
+        <div class="ab-name">LP GIRL</div>
+        <div class="ab-role"><span class="dot"></span>铁杆粉丝 since 2006</div>
+      </div>
+    </div>
+    <div class="ab-p">第一次听到林肯公园，是在一个雨夜——那把破旧的随身听里传出了 <strong>《In The End》</strong>。从那一刻起，我就知道，这是我一辈子的音乐。</div>
+    <div class="ab-p">Chester 的声音像一把刀，能劈开所有的困惑和痛苦，同时又治愈了我。他们的音乐陪我度过了<strong>最难熬的岁月</strong>，也见证了我<strong>最快乐的时光</strong>。</div>
+    <div class="ab-p">这个小小的空间，是我献给林肯公园的情书。</div>
+    <div class="quote">
+      <div class="quote-t">In the end, it doesn't even matter — 但正是这些不matter的瞬间，构成了我们最珍贵的记忆。</div>
+      <cite class="quote-c">— Chester Bennington · 永远的声音</cite>
+    </div>
+    <div class="tags">
+      <span class="tag">Hybrid Theory</span>
+      <span class="tag">Meteora</span>
+      <span class="tag">Chester</span>
+      <span class="tag">Nu-Metal</span>
+      <span class="tag">LP Fan</span>
+      <span class="tag">2000s Rock</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- MINI PLAYER -->
+<div class="mini" id="mini" onclick="goPlayer()">
+  <div class="mini-disc" id="miniDisc"></div>
+  <div class="mini-info">
+    <div class="mini-name" id="miniName">IN THE END</div>
+    <div class="mini-sub2" id="miniSub">LINKIN PARK</div>
+  </div>
+  <div class="mini-btns">
+    <button class="mini-btn" onclick="e=event;e.stopPropagation();prev()">
+      <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6L20 18V6z"/></svg>
+    </button>
+    <button class="mini-btn mini-play" id="miniBtnPlay" onclick="e=event;e.stopPropagation();togglePlay()">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button class="mini-btn" onclick="e=event;e.stopPropagation();next()">
+      <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2.5-6L17 6h2v12h-2z"/></svg>
+    </button>
+  </div>
+  <div class="mini-prog"><div class="mini-prog-fill" id="miniProg"></div></div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <div class="tab active" id="tab-player" onclick="go('player')">
+    <div class="tab-ic">🎵</div><div class="tab-lb">播放器</div>
+  </div>
+  <div class="tab" id="tab-lyrics" onclick="go('lyrics')">
+    <div class="tab-ic">📜</div><div class="tab-lb">歌词</div>
+  </div>
+  <div class="tab" id="tab-playlist" onclick="go('playlist')">
+    <div class="tab-ic">🎸</div><div class="tab-lb">歌单</div>
+  </div>
+  <div class="tab" id="tab-photos" onclick="go('photos')">
+    <div class="tab-ic">📷</div><div class="tab-lb">照片墙</div>
+  </div>
+  <div class="tab" id="tab-about" onclick="go('about')">
+    <div class="tab-ic">🖤</div><div class="tab-lb">关于</div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const songs=[
+  {title:"IN THE END",artist:"Linkin Park",album:"Hybrid Theory · 2000",duration:216,color:"#6a0000",art:"🖤",
+   lyrics:[
+    {t:0,en:"♪  ~  intro  ~  ♪",cn:"前奏..."},
+    {t:8,en:"One thing, I don't know why",cn:"有一件事我始终不明白"},
+    {t:14,en:"It doesn't even matter how hard you try",cn:"无论你多么努力都无济于事"},
+    {t:21,en:"Keep that in mind, I designed this rhyme",cn:"记住这一点，我编织这段韵律"},
+    {t:27,en:"To explain in due time all I know",cn:"在适当的时候解释我所知道的一切"},
+    {t:34,en:"Time is a valuable thing",cn:"时间是珍贵的东西"},
+    {t:40,en:"Watch it fly by as the pendulum swings",cn:"看着它随钟摆的摆动而流逝"},
+    {t:46,en:"Watch it count down to the end of the day",cn:"看它倒计时直到一天的尽头"},
+    {t:52,en:"The clock ticks life away...",cn:"时钟滴答滴答地流逝着生命..."},
+    {t:58,en:"It's so unreal...",cn:"一切都如此不真实..."},
+    {t:64,en:"I kept everything inside",cn:"我把一切都埋藏在心底"},
+    {t:70,en:"Even though I tried, it all fell apart",cn:"尽管我努力过，一切还是崩塌了"},
+    {t:78,en:"What it meant to me will eventually",cn:"对我而言，这一切终将"},
+    {t:84,en:"Be a memory of a time when...",cn:"成为那段岁月的记忆..."},
+    {t:90,en:"I tried so hard and got so far",cn:"我付出了那么多，走了那么远"},
+    {t:97,en:"But in the end, it doesn't even matter",cn:"但到最后，这一切都不重要了"},
+    {t:105,en:"I had to fall to lose it all",cn:"我不得不跌落，失去一切"},
+    {t:112,en:"But in the end, it doesn't even matter",cn:"但到最后，这一切都不重要了"},
+    {t:130,en:"One thing, I don't know why",cn:"有一件事我始终不明白"},
+    {t:150,en:"I tried so hard and got so far",cn:"我付出了那么多，走了那么远"},
+    {t:157,en:"But in the end, it doesn't even matter",cn:"但到最后，这一切都不重要了"},
+    {t:165,en:"I had to fall to lose it all",cn:"我不得不跌落，失去一切"},
+    {t:172,en:"But in the end, it doesn't even matter",cn:"但到最后，这一切都不重要了"},
+    {t:200,en:"I've put my trust in you...",cn:"我曾将信任交付于你..."},
+    {t:210,en:"♪  ~  fade out  ~  ♪",cn:"渐渐淡去..."},
+  ]},
+  {title:"NUMB",artist:"Linkin Park",album:"Meteora · 2003",duration:187,color:"#4a0000",art:"🎵",
+   lyrics:[
+    {t:0,en:"♪  ~  intro  ~  ♪",cn:"前奏..."},
+    {t:8,en:"I'm tired of being what you want me to be",cn:"我厌倦了成为你希望的那个人"},
+    {t:16,en:"Feeling so faithless, lost under the surface",cn:"感到如此无力，迷失在表象之下"},
+    {t:24,en:"I don't know what you're expecting of me",cn:"我不知道你对我有什么期待"},
+    {t:32,en:"Put under the pressure of walking in your shoes",cn:"被迫承受你所走过路的压力"},
+    {t:40,en:"Every step that I take is another mistake to you",cn:"我每走一步，在你眼里都是错误"},
+    {t:50,en:"I've become so numb, I can't feel you there",cn:"我已变得如此麻木，感觉不到你的存在"},
+    {t:58,en:"Become so tired, so much more aware",cn:"变得如此疲惫，却也更加清醒"},
+    {t:66,en:"I'm becoming this, all I want to do",cn:"我正在变成这样，我所想要的"},
+    {t:74,en:"Is be more like me and be less like you",cn:"就是成为更真实的自己，而非成为你"},
+    {t:85,en:"And I know, I may end up failing too",cn:"我知道，我也可能最终失败"},
+    {t:100,en:"I've become so numb, I can't feel you there",cn:"我已变得如此麻木，感觉不到你的存在"},
+    {t:125,en:"All I want to do is be more like me",cn:"我所想要的就是成为更真实的自己"},
+    {t:133,en:"And be less like you...",cn:"而不再是你所期望的那个人..."},
+    {t:160,en:"I've become so numb...",cn:"我已变得如此麻木..."},
+    {t:175,en:"♪  ~  fade out  ~  ♪",cn:"渐渐淡去..."},
+  ]},
+  {title:"CRAWLING",artist:"Linkin Park",album:"Hybrid Theory · 2000",duration:209,color:"#3a0000",art:"🔴",
+   lyrics:[
+    {t:0,en:"♪  ~  intro  ~  ♪",cn:"前奏..."},
+    {t:10,en:"Crawling in my skin",cn:"在我的皮肤下爬行"},
+    {t:16,en:"These wounds, they will not heal",cn:"这些伤口，它们无法愈合"},
+    {t:22,en:"Fear is how I fall",cn:"恐惧使我跌落"},
+    {t:28,en:"Confusing what is real",cn:"混淆了什么是真实"},
+    {t:36,en:"There's something inside me that pulls beneath the surface",cn:"有什么东西在我心底向下拉扯"},
+    {t:50,en:"This lack of self-control I fear is never ending",cn:"这种失控的恐惧似乎永无终结"},
+    {t:70,en:"My walls are closing in...",cn:"我的四壁正在合拢..."},
+    {t:92,en:"Crawling in my skin",cn:"在我的皮肤下爬行"},
+    {t:98,en:"These wounds, they will not heal",cn:"这些伤口，它们无法愈合"},
+    {t:150,en:"Crawling in my skin...",cn:"在我的皮肤下爬行..."},
+    {t:196,en:"Confusing... what is real...",cn:"混淆着... 什么是真实..."},
+  ]},
+  {title:"WHAT I'VE DONE",artist:"Linkin Park",album:"Minutes to Midnight · 2007",duration:235,color:"#5a0010",art:"⚡",
+   lyrics:[
+    {t:0,en:"♪  ~  intro  ~  ♪",cn:"前奏..."},
+    {t:10,en:"In this farewell, there's no blood, there's no alibi",cn:"在这告别中，没有鲜血，没有不在场证明"},
+    {t:28,en:"So let mercy come and wash away what I've done",cn:"让慈悲降临，洗去我所做的一切"},
+    {t:38,en:"I'll face myself to cross out what I've become",cn:"我将直面自己，划去我所变成的样子"},
+    {t:58,en:"For what I've done, I start again",cn:"为了我所做的，我重新开始"},
+    {t:72,en:"Today this ends — I'm forgiving what I've done",cn:"今天这一切结束——我原谅了我所做的"},
+    {t:100,en:"What I've done... forgive what I've done...",cn:"我所做的一切... 原谅我所做的..."},
+    {t:185,en:"For what I've done...",cn:"为了我所做的一切..."},
+    {t:210,en:"♪  ~  fade out  ~  ♪",cn:"渐渐淡去..."},
+  ]},
+  {title:"SOMEWHERE I BELONG",artist:"Linkin Park",album:"Meteora · 2003",duration:213,color:"#400000",art:"🌑",
+   lyrics:[
+    {t:0,en:"♪  ~  intro  ~  ♪",cn:"前奏..."},
+    {t:10,en:"When this began, I had nothing to say",cn:"当这一切开始时，我无话可说"},
+    {t:18,en:"And I'd get lost in the nothingness inside of me",cn:"我迷失在内心的虚无之中"},
+    {t:46,en:"Is the only real thing that I've got left to feel",cn:"是我仅剩的真实感受"},
+    {t:82,en:"I wanna heal, I wanna feel",cn:"我想痊愈，我想感受"},
+    {t:95,en:"I wanna let go of the pain I've felt so long",cn:"我想放下那压抑已久的痛苦"},
+    {t:118,en:"I wanna find something I've wanted all along",cn:"我想找到我一直渴望的东西"},
+    {t:127,en:"Somewhere I belong...",cn:"一个我所归属的地方..."},
+    {t:185,en:"Somewhere I belong...",cn:"一个我所归属的地方..."},
+  ]},
+];
+
+const photos=[
+  {bg:"linear-gradient(145deg,#1a0000,#2d0000)",icon:"🎤",cap:"LP演唱会现场",date:"2017.07.20"},
+  {bg:"linear-gradient(145deg,#000,#1a1a1a)",icon:"🎸",cap:"我的第一张专辑",date:"2006.05.14"},
+  {bg:"linear-gradient(145deg,#111,#2a0000)",icon:"🎵",cap:"深夜写歌词",date:"2020.03.08"},
+  {bg:"linear-gradient(145deg,#0a0a1a,#1a0000)",icon:"📻",cap:"宿舍偷听的夜晚",date:"2015.11.22"},
+  {bg:"linear-gradient(145deg,#200000,#0d0d0d)",icon:"🖤",cap:"Chester 永远在这里",date:"2017.07.21"},
+  {bg:"linear-gradient(145deg,#1a1a00,#0a0a00)",icon:"🎧",cap:"Hybrid Theory 全专",date:"2019.08.30"},
+  {bg:"linear-gradient(145deg,#000,#1a0a0a)",icon:"📸",cap:"买到了周边贴纸",date:"2021.12.25"},
+  {bg:"linear-gradient(145deg,#0d0000,#1a1a1a)",icon:"🌙",cap:"Numb是我的治愈曲",date:"2018.09.09"},
+];
+
+// ===== STATE =====
+let cur=0, playing=false, curT=0, tmr=null, curPage='player';
+
+// ===== INIT =====
+(function init(){
+  renderPl(); renderPlayer(); renderLyrics(); renderPhotos();
+  setupProgTouch(); setupSwipe();
+})();
+
+// ===== NAVIGATION =====
+function go(name){
+  if(curPage===name)return;
+  if(navigator.vibrate)navigator.vibrate(8);
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('pg-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  const mini=document.getElementById('mini');
+  name!=='player'?mini.classList.add('on'):mini.classList.remove('on');
+  curPage=name;
+  if(name==='lyrics')scrollLyr();
+}
+function goPlayer(){ go('player'); }
+
+// ===== RENDER =====
+function renderPlayer(){
+  const s=songs[cur];
+  document.getElementById('tName').textContent=s.title;
+  document.getElementById('tArtist').textContent=s.artist.toUpperCase();
+  document.getElementById('tAlbum').textContent=s.album;
+  document.getElementById('tTime').textContent=fmt(s.duration);
+  document.getElementById('miniName').textContent=s.title;
+  document.getElementById('miniSub').textContent=s.artist;
+  updProg();
+}
+
+function renderPl(){
+  document.getElementById('plCont').innerHTML=songs.map((s,i)=>`
+    <div class="pl-item ${i===cur?'active':''} ${i===cur&&playing?'playing-on':''}" id="pli-${i}" onclick="pick(${i})">
+      <div class="pl-art" style="background:linear-gradient(145deg,${s.color},#111)">
+        <span>${s.art}</span>
+        <div class="pl-art-ov">
+          <div class="pl-bars">
+            <div class="pl-bar"></div><div class="pl-bar"></div><div class="pl-bar"></div>
+          </div>
+        </div>
+      </div>
+      <div class="pl-info">
+        <div class="pl-title">${s.title}</div>
+        <div class="pl-sub">${s.album}</div>
+      </div>
+      <div class="pl-dur">${fmt(s.duration)}</div>
+    </div>
+  `).join('');
+}
+
+function renderLyrics(){
+  const s=songs[cur];
+  document.getElementById('lyrTitle').textContent=s.title;
+  document.getElementById('lyrSub').textContent=`${s.artist} · ${s.album}`;
+  document.getElementById('lyrArea').innerHTML=s.lyrics.map((l,i)=>`
+    <div class="lyr-line" id="ll-${i}">
+      <div class="lyr-en">${l.en}</div>
+      <div class="lyr-cn">${l.cn}</div>
+    </div>
+  `).join('');
+}
+
+function renderPhotos(){
+  document.getElementById('phGrid').innerHTML=photos.map(p=>`
+    <div class="polaroid">
+      <div class="tape"></div>
+      <div class="pol-art" style="background:${p.bg}"><span>${p.icon}</span></div>
+      <div class="pol-cap">${p.cap}<span class="pol-date">${p.date}</span></div>
+    </div>
+  `).join('');
+}
+
+// ===== PLAYBACK =====
+function togglePlay(){
+  playing=!playing;
+  if(navigator.vibrate)navigator.vibrate(playing?[5,18,5]:10);
+  applyState();
+  playing?startTmr():clearInterval(tmr);
+}
+
+function applyState(){
+  document.getElementById('vDisc').classList.toggle('pl',playing);
+  document.getElementById('tArm').classList.toggle('pl',playing);
+  document.getElementById('eqRow').classList.toggle('eq-active',playing);
+  document.getElementById('miniDisc').classList.toggle('pl',playing);
+  const pi=playing?'<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>':'<path d="M8 5v14l11-7z"/>';
+  document.getElementById('playIco').innerHTML=pi;
+  document.getElementById('miniBtnPlay').innerHTML=`<svg viewBox="0 0 24 24">${pi}</svg>`;
+  document.querySelectorAll('.pl-item').forEach((el,i)=>{
+    el.classList.toggle('playing-on',i===cur&&playing);
+  });
+}
+
+function startTmr(){
+  clearInterval(tmr);
+  tmr=setInterval(()=>{
+    curT++;
+    if(curT>=songs[cur].duration){curT=0;next();return;}
+    updProg(); updLyrics();
+  },1000);
+}
+
+function updProg(){
+  const s=songs[cur], pct=(curT/s.duration)*100;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('miniProg').style.width=pct+'%';
+  document.getElementById('cTime').textContent=fmt(curT);
+}
+
+function updLyrics(){
+  const L=songs[cur].lyrics; let ai=0;
+  for(let i=0;i<L.length;i++){if(curT>=L[i].t)ai=i;else break;}
+  document.querySelectorAll('.lyr-line').forEach((el,i)=>{
+    el.classList.toggle('active',i===ai);
+    el.classList.toggle('prev',i===ai-1||i===ai-2);
+  });
+  if(curPage==='lyrics')scrollLyr(ai);
+}
+
+function scrollLyr(idx){
+  const area=document.getElementById('lyrArea');
+  if(!area)return;
+  const lines=area.querySelectorAll('.lyr-line');
+  if(idx===undefined){const a=area.querySelector('.lyr-line.active');if(a)area.scrollTo({top:a.offsetTop-area.clientHeight/2+a.clientHeight/2,behavior:'smooth'});return;}
+  if(lines[idx])area.scrollTo({top:lines[idx].offsetTop-area.clientHeight/2+lines[idx].clientHeight/2,behavior:'smooth'});
+}
+
+function pick(i){
+  cur=i; curT=0;
+  renderPlayer(); renderLyrics(); renderPl();
+  if(playing)startTmr();
+}
+function next(){pick((cur+1)%songs.length);}
+function prev(){if(curT>3){curT=0;updProg();if(playing)startTmr();}else pick((cur-1+songs.length)%songs.length);}
+
+// ===== PROGRESS TOUCH =====
+function setupProgTouch(){
+  const track=document.getElementById('progTrack');
+  let drag=false;
+  function seek(cx){
+    const r=track.getBoundingClientRect();
+    const p=Math.max(0,Math.min(1,(cx-r.left)/r.width));
+    curT=Math.floor(p*songs[cur].duration);
+    updProg(); updLyrics();
+    if(playing)startTmr();
+  }
+  track.addEventListener('touchstart',e=>{drag=true;track.classList.add('drag');seek(e.touches[0].clientX);},{passive:true});
+  document.addEventListener('touchmove',e=>{if(!drag)return;seek(e.touches[0].clientX);},{passive:true});
+  document.addEventListener('touchend',()=>{drag=false;track.classList.remove('drag');});
+  track.addEventListener('click',e=>seek(e.clientX));
+}
+
+// ===== SWIPE TO CHANGE SONG =====
+function setupSwipe(){
+  const pg=document.getElementById('pg-player');
+  let sx=0,sy=0;
+  pg.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+  pg.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx;
+    const dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5){
+      if(navigator.vibrate)navigator.vibrate(14);
+      dx<0?next():prev();
+    }
+  },{passive:true});
+}
+
+function fmt(s){return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;}
+</script>
+</body>
+</html>
